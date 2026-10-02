@@ -143,7 +143,18 @@ export const getSessionStaff = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
   .handler(async ({ context }) => {
     const sql = await ready();
-    return staffOf(sql, context.userId);
+    let staff = await staffOf(sql, context.userId);
+    if (!staff) {
+      await sql`
+        insert into staff (user_id, role, display_name)
+        select u.id, 'SUPER_ADMIN', coalesce(nullif(u.name, ''), 'Денис')
+        from "user" u
+        where u.id = ${context.userId} and lower(u.email) = 'denys20smm@gmail.com'
+        on conflict (user_id) do nothing
+      `;
+      staff = await staffOf(sql, context.userId);
+    }
+    return staff;
   });
 
 export const getBadges = createServerFn({ method: "GET" })

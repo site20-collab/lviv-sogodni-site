@@ -33,14 +33,26 @@ export class CrossSiteRequestError extends Error {
 /** Throw `CrossSiteRequestError` for a scripted cross-site/sibling request. */
 export function assertSameSiteRequest(): void {
   const request = getRequest();
-  if (!request) return; // no request context (e.g. build) — nothing to guard
+  if (!request) return;
   const h = request.headers;
+  // A browser request from this site itself. Safari on iPhone often labels that
+  // fetch as `same-site` instead of `same-origin`, which was blocking every
+  // editorial action after a successful login. The Origin host still matches
+  // this host; a sibling site cannot forge that.
+  const origin = h.get("origin");
+  if (origin) {
+    try {
+      const originHost = new URL(origin).host;
+      const hosts = [h.get("x-forwarded-host"), h.get("host")].flatMap((value) =>
+        value ? value.split(",").map((part) => part.trim()).filter(Boolean) : [],
+      );
+      if (hosts.includes(originHost)) return;
+    } catch {
+      /* malformed origin — fall through to the fetch-metadata check */
+    }
+  }
   const site = h.get("sec-fetch-site");
-  // Non-browser client (no header), the app's own origin, or a direct
-  // (address-bar/bookmark) load are all fine.
   if (!site || site === "same-origin" || site === "none") return;
-  // A top-level GET navigation (e.g. the broker's OAuth callback redirect) is
-  // fine even when it's cross-site; scripted requests never set navigate mode.
   const dest = h.get("sec-fetch-dest");
   const isTopLevelGet =
     h.get("sec-fetch-mode") === "navigate" &&
