@@ -71,19 +71,22 @@ function setBearerToken(token: string | null): void {
   }
 }
 
-/** Cookie session works in the browser, but Vercel server functions often do not see it. Reuse the session token as a bearer. */
+let cachedBearer: { token: string; until: number } | null = null;
+
+/** Read the session token from the same request that already shows the signed-in user. */
 export async function ensureBearerToken(): Promise<string | null> {
+  if (cachedBearer && cachedBearer.until > Date.now()) return cachedBearer.token;
   try {
-    const session = await authClient.getSession();
-    const data = session && typeof session === "object" && "data" in session ? session.data : session;
-    const raw = (data as { session?: { token?: string } } | null | undefined)?.session;
-    const token = raw?.token;
+    const response = await fetch("/api/auth/get-session", { credentials: "include" });
+    const data = (await response.json()) as { session?: { token?: string } | null } | null;
+    const token = data?.session?.token;
     if (typeof token === "string" && token) {
       setBearerToken(token);
+      cachedBearer = { token, until: Date.now() + 60_000 };
       return token;
     }
   } catch {
-    /* cookie session unread — try the stored token */
+    /* fall through to a token saved at sign-in */
   }
   return getBearerToken();
 }
