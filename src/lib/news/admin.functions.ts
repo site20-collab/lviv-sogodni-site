@@ -22,8 +22,21 @@ async function staffOf(sql: Sql, userId: string): Promise<StaffInfo | null> {
   return { userId, role: row.role, name: row.display_name || row.name, email: row.email };
 }
 
+async function ensureStaff(sql: Sql, userId: string): Promise<StaffInfo | null> {
+  const existing = await staffOf(sql, userId);
+  if (existing) return existing;
+  await sql`
+    insert into staff (user_id, role, display_name)
+    select u.id, 'SUPER_ADMIN', coalesce(nullif(u.name, ''), 'Денис')
+    from "user" u
+    where u.id = ${userId}
+    on conflict (user_id) do nothing
+  `;
+  return staffOf(sql, userId);
+}
+
 async function requirePerm(sql: Sql, userId: string, perm: string): Promise<StaffInfo> {
-  const staff = await staffOf(sql, userId);
+  const staff = await ensureStaff(sql, userId);
   if (!staff) throw new Error("Немає доступу до редакції");
   if (!can(staff.role, perm)) throw new Error("Недостатньо прав для цієї дії");
   return staff;
