@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --color-paper: #ffffff;
+  --color-card: #ffffff;
+  --color-ink: #0c1c33;
+  --color-muted: #4e6278;
+  --color-line: #d5e0ec;
+  --color-accent: #0b4f9c;
+  --color-accent-ink: #ffffff;
+  --color-ink-soft: #163454;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+.ls-ticker {
+  animation: ls-ticker 42s linear infinite;
+}
+.ls-ticker:hover {
+  animation-play-state: paused;
+}
+@keyframes ls-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.prose-news {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+.prose-news > * + * {
+  margin-top: 1.05rem;
+}
+.prose-news h2 {
+  font-size: 1.65rem;
+  line-height: 1.25;
+  margin-top: 1.8rem;
+}
+.prose-news h3 {
+  font-size: 1.3rem;
+  line-height: 1.3;
+  margin-top: 1.5rem;
+}
+.prose-news a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-news blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1rem;
+  font-size: 1.35rem;
+  line-height: 1.4;
+}
+.prose-news figcaption,
+.prose-news .caption {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ls-ticker {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
