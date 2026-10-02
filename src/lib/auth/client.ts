@@ -21,10 +21,6 @@ export const authClient = createAuthClient({
   plugins: [genericOAuthClient()],
   fetchOptions: {
     onRequest(ctx) {
-      // Only the sandboxed preview needs a bearer. On the public site a stored
-      // token goes stale after a deploy and makes every editorial request look
-      // unauthorized, even though the cookie session is valid.
-      if (!inLivePreview()) return ctx;
       const token = getBearerToken();
       if (token) ctx.headers.set("Authorization", `Bearer ${token}`);
       return ctx;
@@ -55,7 +51,7 @@ const BEARER_KEY = "grok-auth.bearer-token";
 export function getBearerToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
-    return window.sessionStorage.getItem(BEARER_KEY);
+    return window.localStorage.getItem(BEARER_KEY) || window.sessionStorage.getItem(BEARER_KEY);
   } catch {
     return null;
   }
@@ -64,8 +60,13 @@ export function getBearerToken(): string | null {
 function setBearerToken(token: string | null): void {
   if (typeof window === "undefined") return;
   try {
-    if (token) window.sessionStorage.setItem(BEARER_KEY, token);
-    else window.sessionStorage.removeItem(BEARER_KEY);
+    if (token) {
+      window.localStorage.setItem(BEARER_KEY, token);
+      window.sessionStorage.setItem(BEARER_KEY, token);
+    } else {
+      window.localStorage.removeItem(BEARER_KEY);
+      window.sessionStorage.removeItem(BEARER_KEY);
+    }
   } catch {
     /* storage unavailable — ignore */
   }
@@ -77,7 +78,10 @@ let cachedBearer: { token: string; until: number } | null = null;
 export async function ensureBearerToken(): Promise<string | null> {
   if (cachedBearer && cachedBearer.until > Date.now()) return cachedBearer.token;
   try {
-    const response = await fetch("/api/auth/get-session", { credentials: "include" });
+    const response = await fetch("/api/auth/get-session", {
+      credentials: "include",
+      headers: getBearerToken() ? { authorization: `Bearer ${getBearerToken()}` } : {},
+    });
     const data = (await response.json()) as { session?: { token?: string } | null } | null;
     const token = data?.session?.token;
     if (typeof token === "string" && token) {

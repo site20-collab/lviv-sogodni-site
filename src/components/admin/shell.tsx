@@ -47,7 +47,10 @@ function RequireStaff({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = (sessionData?.session as { token?: string } | undefined)?.token;
     if (typeof token === "string" && token) {
-      try { window.sessionStorage.setItem("grok-auth.bearer-token", token); } catch { /* ignore */ }
+      try {
+        window.localStorage.setItem("grok-auth.bearer-token", token);
+        window.sessionStorage.setItem("grok-auth.bearer-token", token);
+      } catch { /* ignore */ }
     }
   }, [sessionData]);
   useEffect(() => {
@@ -55,7 +58,7 @@ function RequireStaff({ children }: { children: ReactNode }) {
     let ignore = false;
     const headers = new Headers();
     try {
-      const token = window.sessionStorage.getItem("grok-auth.bearer-token");
+      const token = window.localStorage.getItem("grok-auth.bearer-token") || window.sessionStorage.getItem("grok-auth.bearer-token");
       if (token) headers.set("Authorization", `Bearer ${token}`);
     } catch { /* ignore */ }
     fetch("/api/staff", { credentials: "include", headers })
@@ -88,10 +91,10 @@ function RequireStaff({ children }: { children: ReactNode }) {
         </div>
         <nav className={`${nav ? "block" : "hidden"} border-t border-line lg:block`} aria-label="Редакція">
           {visible.map((link) => (
-            <a key={link.href} href={link.href} className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-paper ${pathname === link.href ? "bg-accent text-accent-ink" : ""}`}>
+            <Link key={link.href} to={link.href} className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-paper ${pathname === link.href ? "bg-accent text-accent-ink" : ""}`}>
               <span>{link.label}</span>
               {link.badge && badges[link.badge] > 0 ? <span className="bg-accent px-1.5 text-xs text-accent-ink tabular-nums">{badges[link.badge]}</span> : null}
-            </a>
+            </Link>
           ))}
         </nav>
         <div className="hidden px-4 py-4 text-xs text-muted lg:block">

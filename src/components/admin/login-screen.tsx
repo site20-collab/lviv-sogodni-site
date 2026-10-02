@@ -50,9 +50,10 @@ export function LoginScreen() {
       const token = result.data && "token" in result.data ? result.data.token : undefined;
       if (typeof token === "string" && token) {
         try {
+          window.localStorage.setItem("grok-auth.bearer-token", token);
           window.sessionStorage.setItem("grok-auth.bearer-token", token);
         } catch {
-          /* preview storage unavailable */
+          /* storage unavailable */
         }
       }
       window.location.assign("/admin");
