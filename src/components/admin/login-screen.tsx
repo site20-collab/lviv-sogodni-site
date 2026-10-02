@@ -42,6 +42,7 @@ export function LoginScreen() {
     setError("");
     setPending(true);
     try {
+      await ensureSite();
       const result = await authClient.signIn.email({ email: nextEmail, password: nextPassword });
       if (result.error) {
         setError(loginError(result.error.message));
