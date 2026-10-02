@@ -43,9 +43,11 @@ export const authMiddleware = createMiddleware({ type: "function" })
     // `isolation.server.ts` — keep this import in sync so image `tsc` resolves
     // it, and so Vite does not ship `@tanstack/react-start/server` to the browser.
     const { assertSameSiteRequest } = await import("./isolation.server");
+    const { userIdFromDeskCookie } = await import("@/lib/news/desk.server");
     const { requireUserId } = await import("./verify.server");
-    // Reject scripted cross-site/sibling requests before touching per-user data.
     assertSameSiteRequest();
+    const deskUserId = userIdFromDeskCookie();
+    if (deskUserId) return next({ context: { userId: deskUserId } });
     const userId = await requireUserId(context.bearerToken);
     return next({ context: { userId } });
   });

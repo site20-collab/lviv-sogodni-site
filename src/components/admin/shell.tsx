@@ -91,10 +91,10 @@ function RequireStaff({ children }: { children: ReactNode }) {
         </div>
         <nav className={`${nav ? "block" : "hidden"} border-t border-line lg:block`} aria-label="Редакція">
           {visible.map((link) => (
-            <Link key={link.href} to={link.href} className={`flex items-center justify-between px-4 py-2.5 text-sm hover:bg-paper ${pathname === link.href ? "bg-accent text-accent-ink" : ""}`}>
+            <a key={link.href} href={link.href} className={`flex items-center justify-between px-4 py-3 text-sm hover:bg-paper ${pathname === link.href ? "bg-accent text-accent-ink" : ""}`}>
               <span>{link.label}</span>
               {link.badge && badges[link.badge] > 0 ? <span className="bg-accent px-1.5 text-xs text-accent-ink tabular-nums">{badges[link.badge]}</span> : null}
-            </Link>
+            </a>
           ))}
         </nav>
         <div className="hidden px-4 py-4 text-xs text-muted lg:block">
