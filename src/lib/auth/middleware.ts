@@ -32,7 +32,10 @@ export const authMiddleware = createMiddleware({ type: "function" })
     // this is a no-op there.
     const { ensureBearerToken } = await import("./client");
     const token = await ensureBearerToken();
-    return next({ sendContext: { bearerToken: token ?? undefined } });
+    return next({
+      sendContext: { bearerToken: token ?? undefined },
+      ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
+    });
   })
   .server(async ({ next, context }) => {
     // ONLY import `*.server` modules here. This file is dual client/server
