@@ -37,6 +37,7 @@ import { Route as AdminStatsRouteImport } from './routes/admin/stats'
 import { Route as AdminSubscribersRouteImport } from './routes/admin/subscribers'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as ApiLoginRouteImport } from './routes/api/login'
 import { Route as ApiStaffRouteImport } from './routes/api/staff'
 import { Route as AuthorSlugRouteImport } from './routes/author/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
@@ -190,6 +191,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiLoginRoute = ApiLoginRouteImport.update({
+  id: '/api/login',
+  path: '/api/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStaffRoute = ApiStaffRouteImport.update({
   id: '/api/staff',
   path: '/api/staff',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -363,6 +371,7 @@ export interface FileRoutesById {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/login': typeof ApiLoginRoute
   '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -407,6 +416,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/login'
     | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/login'
     | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/login'
     | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
@@ -518,6 +530,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiLoginRoute: typeof ApiLoginRoute
   ApiStaffRoute: typeof ApiStaffRoute
   AuthorSlugRoute: typeof AuthorSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -727,6 +740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/login': {
+      id: '/api/login'
+      path: '/api/login'
+      fullPath: '/api/login'
+      preLoaderRoute: typeof ApiLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/staff': {
       id: '/api/staff'
       path: '/api/staff'
@@ -875,6 +895,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiLoginRoute: ApiLoginRoute,
   ApiStaffRoute: ApiStaffRoute,
   AuthorSlugRoute: AuthorSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
@@ -890,10 +911,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
