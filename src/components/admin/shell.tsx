@@ -37,6 +37,7 @@ function RequireStaff({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { user, isPending } = useCurrentUserState();
   const [staff, setStaff] = useState<StaffInfo | null | undefined>(undefined);
+  const [staffError, setStaffError] = useState("");
   const [badges, setBadges] = useState({ comments: 0, messages: 0, pending: 0, scheduled: 0 });
   const [nav, setNav] = useState(false);
   useEffect(() => {
@@ -46,7 +47,10 @@ function RequireStaff({ children }: { children: ReactNode }) {
         setStaff(value);
         if (value) void getBadges().then(setBadges).catch(() => undefined);
       })
-      .catch(() => setStaff(null));
+      .catch((error: unknown) => {
+        setStaff(null);
+        setStaffError(error instanceof Error ? error.message : "Невідома помилка");
+      });
   }, [user]);
   if (isPending || (user && staff === undefined)) {
     return <p className="grid min-h-screen place-items-center bg-paper text-muted">Відкриваємо редакцію…</p>;
@@ -58,6 +62,7 @@ function RequireStaff({ children }: { children: ReactNode }) {
         <div>
           <h1 className="font-serif text-3xl">Немає доступу</h1>
           <p className="mt-2 text-muted">Цей обліковий запис не входить до редакції.</p>
+          {staffError ? <p className="mt-2 text-sm text-accent">{staffError}</p> : null}
           <div className="mt-4"><UserButton /></div>
         </div>
       </main>

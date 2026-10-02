@@ -53,6 +53,20 @@ export function assertSameSiteRequest(): void {
   }
   const site = h.get("sec-fetch-site");
   if (!site || site === "same-origin" || site === "none") return;
+  if (site === "same-site") {
+    const hostName = (h.get("x-forwarded-host") || h.get("host") || "").split(",")[0].trim();
+    // vercel.app is a public suffix: "same-site" can only mean this exact app.
+    // iPhone Safari labels its own fetch that way and often omits Origin on GET.
+    if (hostName.endsWith(".vercel.app") || hostName.endsWith(".vercel.app:443")) return;
+    const referer = h.get("referer");
+    if (referer) {
+      try {
+        if (new URL(referer).host === hostName) return;
+      } catch {
+        /* ignore malformed referer */
+      }
+    }
+  }
   const dest = h.get("sec-fetch-dest");
   const isTopLevelGet =
     h.get("sec-fetch-mode") === "navigate" &&
