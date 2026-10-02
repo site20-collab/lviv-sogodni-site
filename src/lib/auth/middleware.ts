@@ -30,8 +30,9 @@ export const authMiddleware = createMiddleware({ type: "function" })
     // Live preview (partitioned iframe): the session rides a bearer token, not a
     // cookie, so forward it to the server. Null when deployed (cookie auth), so
     // this is a no-op there.
-    const { getBearerToken } = await import("./client");
-    return next({ sendContext: { bearerToken: getBearerToken() ?? undefined } });
+    const { ensureBearerToken } = await import("./client");
+    const token = await ensureBearerToken();
+    return next({ sendContext: { bearerToken: token ?? undefined } });
   })
   .server(async ({ next, context }) => {
     // ONLY import `*.server` modules here. This file is dual client/server
