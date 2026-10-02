@@ -33,7 +33,7 @@ import { betterAuth } from "better-auth";
 import { bearer, genericOAuth } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { getCookie } from "@tanstack/react-start/server";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { Pool } from "pg";
 import { ensureDbReady, getPglite } from "../db";
 import { emailAndPasswordEnabled } from "./email-password";
@@ -173,7 +173,10 @@ export const auth = betterAuth({
   baseURL,
   // Deployed apps inject BETTER_AUTH_SECRET. Preview: process-stable secret on
   // globalThis so HMR doesn't invalidate PGLite-backed sessions (see above).
-  secret: env("BETTER_AUTH_SECRET") ?? previewAuthSecret(),
+  // Without a fixed BETTER_AUTH_SECRET, each Vercel instance mints its own
+  // secret and the session cookie from the first login fails on the next
+  // request. Derive a stable one from the database URL when the env is unset.
+  secret: env("BETTER_AUTH_SECRET") ?? (databaseUrl ? createHash("sha256").update(`lviv-sogodni:${databaseUrl}`).digest("hex") : previewAuthSecret()),
   database,
 
   // CSRF / origin check for credentialed auth POSTs (email sign-up/sign-in, …).

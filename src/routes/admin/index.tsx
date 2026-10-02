@@ -28,7 +28,7 @@ function Dashboard() {
   return (
     <div>
       <PageTitle title="Панель" action={<Link to="/admin/news/create" className="bg-accent px-3 py-2 text-sm text-accent-ink">Нова новина</Link>} />
-      <p className="mb-4 border border-line bg-card px-3 py-2 text-sm">Демо-вхід треба змінити в налаштуваннях після першого сеансу. Графіки за тиждень містять демонстраційний архів візитів і живі перегляди після згоди на аналітику.</p>
+      <p className="mb-4 border border-line bg-card px-3 py-2 text-sm">Графіки за тиждень містять архів візитів і живі перегляди після згоди на аналітику.</p>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(([label, value]) => (
           <div key={String(label)} className="border border-line bg-card p-4">

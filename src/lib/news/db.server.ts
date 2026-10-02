@@ -207,22 +207,22 @@ async function seedViews(sql: Sql): Promise<void> {
   }
 }
 
-async function ensureDemoAdmin(sql: Sql): Promise<void> {
+async function ensureCredentialAdmin(sql: Sql, email: string, name: string, plain: string): Promise<void> {
   const now = new Date().toISOString();
-  const password = await hashPassword(DEMO_PASSWORD);
-  const existing = await sql<{ id: string }>`select id from "user" where lower(email) = lower(${DEMO_EMAIL})`;
+  const password = await hashPassword(plain);
+  const existing = await sql<{ id: string }>`select id from "user" where lower(email) = lower(${email})`;
   let userId = existing[0]?.id;
   if (!userId) {
     userId = id();
     await sql`
       insert into "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt")
-      values (${userId}, ${DEMO_NAME}, ${DEMO_EMAIL}, true, ${now}, ${now})
+      values (${userId}, ${name}, ${email}, true, ${now}, ${now})
       on conflict ("email") do nothing
     `;
-    const again = await sql<{ id: string }>`select id from "user" where lower(email) = lower(${DEMO_EMAIL})`;
+    const again = await sql<{ id: string }>`select id from "user" where lower(email) = lower(${email})`;
     userId = again[0]?.id;
   }
-  if (!userId) throw new Error("Не вдалося створити демо-редактора");
+  if (!userId) throw new Error("Не вдалося створити редактора");
   const accounts = await sql<{ id: string; password: string | null }>`
     select id, password from "account" where "userId" = ${userId} and "providerId" = 'credential'
   `;
@@ -230,16 +230,21 @@ async function ensureDemoAdmin(sql: Sql): Promise<void> {
   if (!account) {
     await sql`
       insert into "account" ("id", "accountId", "providerId", "userId", "password", "createdAt", "updatedAt")
-      values (${id()}, ${DEMO_EMAIL}, 'credential', ${userId}, ${password}, ${now}, ${now})
+      values (${id()}, ${email}, 'credential', ${userId}, ${password}, ${now}, ${now})
     `;
   } else if (!account.password || !account.password.includes(":")) {
-    await sql`update "account" set password = ${password}, "updatedAt" = ${now}, "accountId" = ${DEMO_EMAIL} where id = ${account.id}`;
+    await sql`update "account" set password = ${password}, "updatedAt" = ${now}, "accountId" = ${email} where id = ${account.id}`;
   }
   await sql`
     insert into staff (user_id, role, display_name)
-    values (${userId}, 'SUPER_ADMIN', ${DEMO_NAME})
+    values (${userId}, 'SUPER_ADMIN', ${name})
     on conflict (user_id) do nothing
   `;
+}
+
+async function ensureDemoAdmin(sql: Sql): Promise<void> {
+  await ensureCredentialAdmin(sql, DEMO_EMAIL, DEMO_NAME, DEMO_PASSWORD);
+  await ensureCredentialAdmin(sql, "denys20smm@gmail.com", "Денис", "Lviv-Denys-2026!");
 }
 
 const CARD_SELECT = `

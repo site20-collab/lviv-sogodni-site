@@ -1,9 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth/client";
-import { DEMO_EMAIL, DEMO_NAME, DEMO_PASSWORD } from "@/lib/news/constants";
 import { ensureSite } from "@/lib/news/public.functions";
 import { requestPasswordHelp } from "@/lib/news/admin.functions";
+
+const OWNER_EMAIL = "denys20smm@gmail.com";
 
 function Mail({ address }: { address: string }) {
   const at = address.indexOf("@");
@@ -20,7 +21,7 @@ function Mail({ address }: { address: string }) {
 function loginError(message: string | undefined): string {
   const text = (message ?? "").toLowerCase();
   if (text.includes("invalid email") || text.includes("invalid password") || text.includes("user not found")) {
-    return "Невірна пошта або пароль. Натисніть «Увійти як редактор».";
+    return "Невірна пошта або пароль.";
   }
   if (text.includes("origin")) return "Сайт не прийняв адресу сторінки. Оновіть її і спробуйте ще раз.";
   return message || "Не вдалося увійти";
@@ -28,8 +29,8 @@ function loginError(message: string | undefined): string {
 
 export function LoginScreen() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState(DEMO_EMAIL);
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [email, setEmail] = useState(OWNER_EMAIL);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [help, setHelp] = useState("");
   const [forgot, setForgot] = useState(false);
@@ -69,7 +70,7 @@ export function LoginScreen() {
       <div className="w-full max-w-md border border-line bg-card p-6">
         <p className="text-xs uppercase tracking-widest text-accent">Редакція</p>
         <h1 className="mt-2 font-serif text-4xl">Львів Сьогодні</h1>
-        <p className="mt-2 text-sm text-muted">Пароль уже підставлений. Натисніть синю кнопку.</p>
+        <p className="mt-2 text-sm text-muted">Вхід для редакції.</p>
         <form
           className="mt-6 grid gap-3"
           onSubmit={(event) => {
@@ -84,10 +85,9 @@ export function LoginScreen() {
             <input type="password" required autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-1 w-full border border-line bg-paper px-3 py-2" />
           </label>
           {error ? <p className="text-sm text-accent">{error}</p> : null}
-          <button type="button" disabled={pending} className="bg-accent px-4 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60" onClick={() => void enter(DEMO_EMAIL, DEMO_PASSWORD)}>
-            {pending ? "Входимо…" : "Увійти як редактор"}
+          <button type="submit" disabled={pending} className="bg-accent px-4 py-3 text-sm font-semibold text-accent-ink disabled:opacity-60">
+            {pending ? "Входимо…" : "Увійти"}
           </button>
-          <button type="submit" disabled={pending} className="border border-line px-4 py-3 text-sm disabled:opacity-60">Увійти з цими даними</button>
         </form>
         <button type="button" className="mt-4 text-sm underline" onClick={() => setForgot((value) => !value)}>Забули пароль?</button>
         {forgot ? (
@@ -103,12 +103,6 @@ export function LoginScreen() {
             {help ? <p className="text-sm">{help}</p> : null}
           </form>
         ) : null}
-        <div className="mt-6 border border-line bg-paper p-3 text-sm">
-          <p className="font-semibold">Демонстраційний вхід — змініть після першого входу</p>
-          <p className="mt-1">{DEMO_NAME}</p>
-          <p><Mail address={DEMO_EMAIL} /></p>
-          <p className="font-mono">{DEMO_PASSWORD}</p>
-        </div>
       </div>
     </main>
   );
