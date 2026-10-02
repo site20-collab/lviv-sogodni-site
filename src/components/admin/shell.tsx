@@ -2,7 +2,7 @@ import { Link, Navigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { getBadges, getSessionStaff } from "@/lib/news/admin.functions";
+import { getBadges } from "@/lib/news/admin.functions";
 import { can } from "@/lib/news/permissions";
 import { ROLE_LABEL } from "@/lib/news/format";
 import type { StaffInfo, StaffRole } from "@/lib/news/types";
@@ -42,15 +42,26 @@ function RequireStaff({ children }: { children: ReactNode }) {
   const [nav, setNav] = useState(false);
   useEffect(() => {
     if (!user) return;
-    getSessionStaff()
+    let ignore = false;
+    fetch("/api/staff", { credentials: "include" })
+      .then(async (response) => {
+        const body = (await response.json().catch(() => null)) as { staff?: StaffInfo | null; error?: string } | null;
+        if (!response.ok || !body?.staff) throw new Error(body?.error || "Немає доступу");
+        return body.staff;
+      })
       .then((value) => {
+        if (ignore) return;
         setStaff(value);
         if (value) void getBadges().then(setBadges).catch(() => undefined);
       })
       .catch((error: unknown) => {
+        if (ignore) return;
         setStaff(null);
         setStaffError(error instanceof Error ? error.message : "Невідома помилка");
       });
+    return () => {
+      ignore = true;
+    };
   }, [user]);
   if (isPending || (user && staff === undefined)) {
     return <p className="grid min-h-screen place-items-center bg-paper text-muted">Відкриваємо редакцію…</p>;

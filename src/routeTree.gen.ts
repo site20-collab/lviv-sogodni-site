@@ -37,6 +37,7 @@ import { Route as AdminStatsRouteImport } from './routes/admin/stats'
 import { Route as AdminSubscribersRouteImport } from './routes/admin/subscribers'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as ApiStaffRouteImport } from './routes/api/staff'
 import { Route as AuthorSlugRouteImport } from './routes/author/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
@@ -189,6 +190,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiStaffRoute = ApiStaffRouteImport.update({
+  id: '/api/staff',
+  path: '/api/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthorSlugRoute = AuthorSlugRouteImport.update({
   id: '/author/$slug',
   path: '/author/$slug',
@@ -273,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/admin/subscribers': typeof AdminSubscribersRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/api/staff': typeof ApiStaffRoute
   '/author/$slug': typeof AuthorSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/news/$slug': typeof NewsSlugRoute
@@ -398,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
     | '/news/$slug'
@@ -438,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
     | '/news/$slug'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/admin/subscribers'
     | '/admin/tags'
     | '/admin/users'
+    | '/api/staff'
     | '/author/$slug'
     | '/category/$slug'
     | '/news/$slug'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  ApiStaffRoute: typeof ApiStaffRoute
   AuthorSlugRoute: typeof AuthorSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
   NewsSlugRoute: typeof NewsSlugRoute
@@ -714,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/staff': {
+      id: '/api/staff'
+      path: '/api/staff'
+      fullPath: '/api/staff'
+      preLoaderRoute: typeof ApiStaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/author/$slug': {
       id: '/author/$slug'
       path: '/author/$slug'
@@ -855,6 +875,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  ApiStaffRoute: ApiStaffRoute,
   AuthorSlugRoute: AuthorSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
   NewsSlugRoute: NewsSlugRoute,

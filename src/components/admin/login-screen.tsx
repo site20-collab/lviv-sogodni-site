@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import { ensureSite } from "@/lib/news/public.functions";
@@ -28,7 +27,6 @@ function loginError(message: string | undefined): string {
 }
 
 export function LoginScreen() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState(OWNER_EMAIL);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -43,7 +41,7 @@ export function LoginScreen() {
     setError("");
     setPending(true);
     try {
-      await ensureSite();
+      await ensureSite().catch(() => undefined);
       const result = await authClient.signIn.email({ email: nextEmail, password: nextPassword });
       if (result.error) {
         setError(loginError(result.error.message));
@@ -57,7 +55,7 @@ export function LoginScreen() {
           /* preview storage unavailable */
         }
       }
-      void navigate({ to: "/admin" });
+      window.location.assign("/admin");
     } catch (cause) {
       setError(cause instanceof Error ? loginError(cause.message) : "Не вдалося увійти");
     } finally {
