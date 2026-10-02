@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Львів Сьогодні">
+  <rect width="32" height="32" fill="#ffffff"/>
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" fill="none" stroke="#0c1c33" stroke-width="1.5"/>
+  <rect x="0" y="0" width="32" height="4" fill="#0b4f9c"/>
+  <path fill="#0c1c33" d="M6.2 24.2h4.15l4.55-9.35 4.7 9.35h4.2L16.15 7.6h-1.35L6.2 24.2z"/>
+  <rect x="5.5" y="26.35" width="21" height="1.35" fill="#0b4f9c"/>
+</svg>
