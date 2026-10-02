@@ -21,6 +21,10 @@ export const authClient = createAuthClient({
   plugins: [genericOAuthClient()],
   fetchOptions: {
     onRequest(ctx) {
+      // Only the sandboxed preview needs a bearer. On the public site a stored
+      // token goes stale after a deploy and makes every editorial request look
+      // unauthorized, even though the cookie session is valid.
+      if (!inLivePreview()) return ctx;
       const token = getBearerToken();
       if (token) ctx.headers.set("Authorization", `Bearer ${token}`);
       return ctx;
@@ -69,20 +73,19 @@ function setBearerToken(token: string | null): void {
 
 /** Cookie session works in the browser, but Vercel server functions often do not see it. Reuse the session token as a bearer. */
 export async function ensureBearerToken(): Promise<string | null> {
-  const existing = getBearerToken();
-  if (existing) return existing;
   try {
     const session = await authClient.getSession();
-    const raw = session.data?.session as { token?: string } | null | undefined;
+    const data = session && typeof session === "object" && "data" in session ? session.data : session;
+    const raw = (data as { session?: { token?: string } } | null | undefined)?.session;
     const token = raw?.token;
     if (typeof token === "string" && token) {
       setBearerToken(token);
       return token;
     }
   } catch {
-    return null;
+    /* cookie session unread — try the stored token */
   }
-  return null;
+  return getBearerToken();
 }
 
 /**
